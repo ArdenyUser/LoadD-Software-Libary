@@ -3,6 +3,9 @@ echo EMULATION-THOR
 echo Put in any directory with code.ethor file -ETHOR is a zip with Thor/ArdenWare code in it- and activate EMULATION-THOR.
 echo Begin? Y -CAPS- or N:
 read rqa
+echo What dir will the ETHOR be?
+read location
+cd $location
 if [ $rqa -eq Y ] then
 mv ./code.ethor ./code.zip
 unzip code.zip
