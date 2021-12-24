@@ -6,7 +6,7 @@ read rqa
 if [ $rqa -eq Y ] then
 mv ./code.ethor ./code.zip
 unzip code.zip
-wget [ETHOR EMULATION BOX]
+wget https://github.com/ArdenyUser/LoadD-Software-Libary/raw/main/ArdenWareThorium/emulator.zip
 unzip emulator.zip
 make
 fi
