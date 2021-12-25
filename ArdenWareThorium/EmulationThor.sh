@@ -11,5 +11,6 @@ mv ./code.ethor ./code.zip
 unzip code.zip
 wget https://github.com/ArdenyUser/LoadD-Software-Libary/raw/main/ArdenWareThorium/emulator.zip
 unzip emulator.zip
+# ADD AARCH64 MAKEFILE OR ARM MAKEFILE
 make
 fi
