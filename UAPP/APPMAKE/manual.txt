@@ -1,0 +1,30 @@
+APP MAKE INSTRUCTIONS
+=====================
+
+First, to generate app, create a APPMAKE file. Next, add repeated code scripts
+that are like this:
+
+[elf file to link to]
+[app file name]
+...
+
+Then, you made a APPMAKE file! To make more configs, list more of the scripts above.
+Remember yo replace the things in the []s! Also, you can make a app run more than
+1 elf you can make more than 1 configuration for each file. Now, how do you
+run a APPMAKE file? Well first go copy & paste (do this sentence if your project is
+not a template) the elfexepreferences.sh file into the folder with the
+APPMAKE file. (do this even if your project is a template -->) Now, edit the file
+you just pasted and edit the part that looks like this:
+
+elfexecute () {
+   [function to execute elf] $1
+}
+
+Edit the []s depending on what system your apps are running on. (the elf
+exepreferences file needs to be in every dir with a APPMAKE file.) And, getting close
+to finished, copy and paste the elfexecuter.sh to your programs's main dir if it is
+not already there. Then, in the same dir as the elfexecuter.sh file, add a
+appexecute file and add a list of the APP files. Now, wanna make an app? To
+execute the APPMAKE file, copy and paste appmake.py to the same dir
+as the programs if it is not already there. Execute it and your app is
+compiled. NOTICE: appexecute conatins names of .app files! Add the extensions!
