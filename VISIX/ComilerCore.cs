@@ -2,12 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 
-const string dataVis = @"
- copy(C:/test.txt, C:/output.txt)
- print(Hello)
-";
+string dataVis = File.ReadAllText(@"data.vis");
 
 List<string> tokens = new List<string>();
 
@@ -158,6 +156,21 @@ List<string> tokens = new List<string>();
             continue;
         }
 
+        if (Current() == "direct")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.cs", arg + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
         if (Current() == "embed")
         {
             position++;
@@ -167,6 +180,21 @@ List<string> tokens = new List<string>();
             string arg = Consume();
 
             File.Copy("C:/Visix/Embeds/" + arg, arg);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        if (Current() == "var")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.cs", arg + Environment.NewLine);
 
             _ = Consume(); // Close parenthesis
 
