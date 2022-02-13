@@ -4,18 +4,18 @@ using System.Text;
 
 class Main
 {
-    static void Main()
+    static void Core()
     {
         string path = @"c:\temp\SCRIPT.vis";
 
-        char previous = '';
+        char previous;
         string all = "";
         string cmd = "";
         string scpy;
         int mode = 0;
-        string aug2;
+        string aug2 = "";
 
-        Stream s = new FileStream(@"data.vi", FileMode.Open);
+        Stream s = new FileStream(@"data.vis", FileMode.Open);
         int val = 0;
         char ch;
 
@@ -29,7 +29,7 @@ class Main
             Console.Write(ch);
             if (ch != '(')
             {
-                all = Concat(all, ch);
+                all = ch.ToString();
 
 
             }
@@ -39,20 +39,20 @@ class Main
                 all = "";
 
             }
-            if (mode = 1)
+            if (mode == 1)
             {
                 cmd = all;
-                all = Concat(all, ch);
+                all = ch.ToString();
             }
             if (ch == ',')
             {
                 mode = 2;
                 all = "";
             }
-            if (mode = 2)
+            if (mode == 2)
             {
                 aug2 = all;
-                all = Concat(all, ch);
+                all = ch.ToString();
             }
             if (ch == ')')
             {
@@ -62,7 +62,7 @@ class Main
                 }
                 if (cmd == "copy")
                 {
-                    File.AppendAllText(@"main.vis", "File.Copy(" + all", " + aug2");" + Environment.NewLine);
+                    File.AppendAllText(@"main.vis", "File.Copy(" + all + ", " + aug2 + ");" + Environment.NewLine);
                 }
                 if (cmd == "using")
                 {
@@ -70,7 +70,7 @@ class Main
                 }
                 if (cmd == "fileAppend")
                 {
-                    File.AppendAllText(@"main.vis", "File.AppendAllText(@" + all + ',' + aug2 " + Environment.NewLine);" + Environment.NewLine);
+                    File.AppendAllText(@"main.vis", "File.AppendAllText(@" + all + ',' + aug2 + " + Environment.NewLine);" + Environment.NewLine);
                 }
             }
         }
