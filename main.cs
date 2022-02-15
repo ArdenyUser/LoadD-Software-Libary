@@ -1,79 +1,263 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
+using System.Net;
+using System.IO.Compression;
 
-class Main
+string dataVis = File.ReadAllText(@"data.vis");
+string vlibMode = " ";
+
+List<string> tokens = new List<string>();
+
+// 1. Lex source
+
 {
-    static void Core()
+    int position = 0;
+
+    Func<char> Current = () => position >= dataVis.Length
+        ? '\0'
+        : dataVis[position];
+
+    while (true)
     {
-        string path = @"c:\temp\SCRIPT.vis";
-
-        char previous;
-        string all = "";
-        string cmd = "";
-        string scpy;
-        int mode = 0;
-        string aug2 = "";
-
-        Stream s = new FileStream(@"data.vis", FileMode.Open);
-        int val = 0;
-        char ch;
-
-        while (true)
+        // End on null terminator - indicates end of string
+        if (Current() == '\0')
         {
-            val = s.ReadByte();
+            break;
+        }
 
-            if (val < 0)
-                break;
-            ch = (char)val;
-            Console.Write(ch);
-            if (ch != '(')
-            {
-                all = ch.ToString();
+        // Ignore whitespace (inc. new lines)
+        if (char.IsWhiteSpace(Current()))
+        {
+            position++;
+            continue;
+        }
 
+        // Special punctuation can go into it's own token
+        if (new[] { '(', ')', ',' }.Contains(Current()))
+        {
+            tokens.Add(Current().ToString());
+            position++;
+            continue;
+        }
 
-            }
-            else
-            {
-                mode = 1;
-                all = "";
+        // Otherwise assume a string (represents a command name & any arguments)
+        ReadString();
+    }
 
-            }
-            if (mode == 1)
+    void ReadString()
+    {
+        StringBuilder sb = new StringBuilder();
+
+        bool done = false;
+
+        while (!done)
+        {
+            switch (Current())
             {
-                cmd = all;
-                all = ch.ToString();
-            }
-            if (ch == ',')
-            {
-                mode = 2;
-                all = "";
-            }
-            if (mode == 2)
-            {
-                aug2 = all;
-                all = ch.ToString();
-            }
-            if (ch == ')')
-            {
-                if (cmd == "embed")
-                {
-                    File.Copy("C:/Visix/Embeds/" + all, all);
-                }
-                if (cmd == "copy")
-                {
-                    File.AppendAllText(@"main.vis", "File.Copy(" + all + ", " + aug2 + ");" + Environment.NewLine);
-                }
-                if (cmd == "using")
-                {
-                    File.AppendAllText(@"main.vis", "using " + all + Environment.NewLine);
-                }
-                if (cmd == "fileAppend")
-                {
-                    File.AppendAllText(@"main.vis", "File.AppendAllText(@" + all + ',' + aug2 + " + Environment.NewLine);" + Environment.NewLine);
-                }
+                case ',':
+                case '\t':
+                case '\0':
+                case '(':
+                case ')':
+                    done = true;
+                    break;
+                default:
+                    sb.Append(Current());
+                    position++;
+                    break;
             }
         }
-        Console.WriteLine();
+
+        tokens.Add(sb.ToString());
     }
 }
+
+// 2. Parse tokens
+
+{
+    int position = 0;
+
+    Func<string> Current = () => position >= tokens.Count
+        ? null
+        : tokens[position];
+
+    StringBuilder sb = new StringBuilder();
+
+    Func<string> Consume = () =>
+    {
+        string token = position < tokens.Count
+            ? tokens[position]
+            : null;
+
+        position++;
+
+        return token;
+    };
+
+    while (true)
+    {
+        // End of tokens
+        if (Current() == null)
+        {
+            break;
+        }
+
+        // If it's a copy token we can consume it & the expected trailing tokens
+        if (Current() == "copy")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string firstArg = Consume();
+
+            _ = Consume(); // Comma
+
+            string secondArg = Consume();
+
+            _ = Consume(); // Close parenthesis
+
+            sb.AppendLine($@"File.Copy(""{firstArg}"", ""{secondArg}"");");
+
+            continue;
+        }
+
+        if (Current() == "print")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.cs", "Console.WriteLine(" + arg + ");" + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+
+
+        if (Current() == "use")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.cs", "using " + arg + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        if (Current() == "direct")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.cs", arg + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        if (Current() == "embed")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+            // code for VISIX
+            File.Copy("C:/Visix/Embeds/" + arg, arg);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+        
+        if (Current() == "str")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.cs", "string " + arg + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        if (Current() == "int")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.cs", "int " + arg + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        if (Current() == "float")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.cs", "float " + arg + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        // FUNCTION edits compiler to add functions.
+        if (Current() == "FUNCTION")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            using (WebClient web1 = new WebClient())
+                if (!File.Exists("compiler.cs"))
+                {
+                    web1.DownloadFile("github.com/ArdenyUser/visix-project/NET-DATABASE/compiler.cs", "compiler.cs");
+                }
+
+            File.AppendAllText(@"compiler.cs", arg + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+    }
+
+
+        // Add more commands here
+    }
+
+    // Write to data.vis - just printing for demonstration
