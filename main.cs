@@ -263,32 +263,28 @@ List<string> tokens = new List<string>();
 
             string arg = Consume();
 
-            File.AppendAllText(@"main.vis", "if (Current() == " arg + Environment.NewLine);
+            File.AppendAllText(@"main.vis", "            if (Current() == " arg + Environment.NewLine);
             
-            File.AppendAllText(@"main.vis", "{" arg + Environment.NewLine);
+            File.AppendAllText(@"main.vis", "            {" arg + Environment.NewLine);
 
-            File.AppendAllText(@"main.vis", "   position++;" arg + Environment.NewLine);
+            File.AppendAllText(@"main.vis", "               position++;" arg + Environment.NewLine);
             
-            File.AppendAllText(@"main.vis", "   _ = Consume();" arg + Environment.NewLine);
+            File.AppendAllText(@"main.vis", "               _ = Consume();" arg + Environment.NewLine);
             
-            File.AppendAllText(@"main.vis", "   string arg = Consume();" arg + Environment.NewLine);
+            File.AppendAllText(@"main.vis", "               string arg = Consume();" arg + Environment.NewLine);
 
             _ = Consume(); // Close parenthesis
 
             continue;
         }
         
-        if (Current() == "FEND")
+        if (Current() == "FLEND")
         {
             position++;
 
             _ = Consume(); // Open parenthesis
 
             string arg = Consume();
-            
-            File.AppendAllText(@"main.vis", "   _ = Consume();" arg + Environment.NewLine);
-            
-            File.AppendAllText(@"main.vis", "   continue;" arg + Environment.NewLine);
             
             File.AppendAllText(@"main.vis", "}" arg + Environment.NewLine);
 
