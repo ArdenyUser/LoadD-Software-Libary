@@ -6,9 +6,12 @@ using System.Reflection.Metadata;
 using System.Text;
 using System.Net;
 using System.IO.Compression;
+using System.Diagnostics;
 
 string dataVis = File.ReadAllText(@"data.vis");
 string vlibMode = " ";
+string name = " ";
+string fconfig = "https://raw.githubusercontent.com/ArdenyUser/VISIXProject/main/NET/NewCompiler.cs";
 
 List<string> tokens = new List<string>();
 
@@ -187,7 +190,7 @@ List<string> tokens = new List<string>();
 
             continue;
         }
-        
+
         if (Current() == "str")
         {
             position++;
@@ -233,6 +236,70 @@ List<string> tokens = new List<string>();
             continue;
         }
 
+        if (Current() == "wname")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            name = arg;
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        if (Current() == "wget")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            using (WebClient web1 = new WebClient())
+                if (!File.Exists("compiler.cs"))
+                {
+                    web1.DownloadFile(arg, name);
+                }
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        if (Current() == "exe")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            Process.Start(arg);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
+        if (Current() == "FCONFIG")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            fconfig = arg;
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
         // FUNCTION edits compiler to add functions.
         if (Current() == "FUNCTION")
         {
@@ -245,10 +312,10 @@ List<string> tokens = new List<string>();
             using (WebClient web1 = new WebClient())
                 if (!File.Exists("compiler.cs"))
                 {
-                    web1.DownloadFile("github.com/ArdenyUser/visix-project/NET-DATABASE/compiler.cs", "compiler.cs");
+                    web1.DownloadFile(fconfig, "compiler.cs");
                 }
 
-            File.AppendAllText(@"compiler.cs", arg + Environment.NewLine);
+            File.AppendAllText(@"compiler.cs", "        " + arg + Environment.NewLine);
 
             _ = Consume(); // Close parenthesis
 
@@ -263,21 +330,43 @@ List<string> tokens = new List<string>();
 
             string arg = Consume();
 
-            File.AppendAllText(@"main.vis", "            if (Current() == " arg + Environment.NewLine);
-            
-            File.AppendAllText(@"main.vis", "            {" arg + Environment.NewLine);
+            File.AppendAllText(@"main.vis", "            if (Current() == " + arg + Environment.NewLine);
 
-            File.AppendAllText(@"main.vis", "               position++;" arg + Environment.NewLine);
-            
-            File.AppendAllText(@"main.vis", "               _ = Consume();" arg + Environment.NewLine);
-            
-            File.AppendAllText(@"main.vis", "               string arg = Consume();" arg + Environment.NewLine);
+            File.AppendAllText(@"main.vis", "            {" + arg + Environment.NewLine);
+
+            File.AppendAllText(@"main.vis", "               position++;" + arg + Environment.NewLine);
+
+            File.AppendAllText(@"main.vis", "               _ = Consume();" + arg + Environment.NewLine);
+
+            File.AppendAllText(@"main.vis", "               string arg = Consume();" + arg + Environment.NewLine);
 
             _ = Consume(); // Close parenthesis
 
             continue;
         }
-        
+        if (Current() == "FDEFINE")
+        {
+            position++;
+
+            _ = Consume(); // Open parenthesis
+
+            string arg = Consume();
+
+            File.AppendAllText(@"main.vis", "            if (Current() == " + arg + Environment.NewLine);
+
+            File.AppendAllText(@"main.vis", "            {" + arg + Environment.NewLine);
+
+            File.AppendAllText(@"main.vis", "               position++;" + arg + Environment.NewLine);
+
+            File.AppendAllText(@"main.vis", "               _ = Consume();" + arg + Environment.NewLine);
+
+            File.AppendAllText(@"main.vis", "               string arg = Consume();" + arg + Environment.NewLine);
+
+            _ = Consume(); // Close parenthesis
+
+            continue;
+        }
+
         if (Current() == "FLEND")
         {
             position++;
@@ -285,8 +374,8 @@ List<string> tokens = new List<string>();
             _ = Consume(); // Open parenthesis
 
             string arg = Consume();
-            
-            File.AppendAllText(@"main.vis", "}" arg + Environment.NewLine);
+
+            File.AppendAllText(@"main.vis", "}" + arg + Environment.NewLine);
 
             _ = Consume(); // Close parenthesis
 
@@ -295,7 +384,7 @@ List<string> tokens = new List<string>();
     }
 
 
-        // Add more commands here
-    }
+    // Add more commands here
+}
 
-    // Write to data.vis - just printing for demonstration
+// Write to data.vis - just printing for demonstration
