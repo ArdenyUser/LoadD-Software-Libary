@@ -1,0 +1,1 @@
+This is a collection of V-Script (an example is Visix) and NOT a IDE. To use, move your code into the folder of thier V-Script version. 
